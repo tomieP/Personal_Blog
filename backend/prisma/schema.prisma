@@ -13,3 +13,188 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole{
+  ADMIN
+  USER
+}
+
+enum UserStatus{
+  ACTIVE
+  BANNED
+}
+
+model User {
+  id String   @id @default(uuid())
+
+  role UserRole @default(USER)
+  email String   @unique
+  username String
+  hashPassword String
+
+  avatarUrl String?
+
+  status UserStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  posts Post[]
+  comments Comment[]
+  reactions Reaction[]
+  emojis Emoji[]
+}
+
+enum PostStatus{
+  PENDING
+  APPROVED
+  REJECTED
+}
+model Post {
+  id String @id @default(uuid())
+  authorId String
+  author User @relation(fields: [authorId],references: [id])
+
+  title String
+  slug String @unique
+  content Json
+  thumbnailUrl String
+  status PostStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  publishedAt DateTime?
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  comments Comment[]
+  reactions Reaction[]
+}
+
+enum CommentStatus{
+  VISIBLE
+  CHANGED
+  DELETED
+}
+
+model Comment {
+  id String @id @default(uuid())
+  userId String 
+  postId String
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  content String
+  status CommentStatus @default(VISIBLE)
+  parentCommentId String? 
+  parent Comment? @relation("CommentReplies", fields: [parentCommentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?  
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentCommentId])
+}
+
+enum EmojiType{
+  CUSTOM
+  SYSTEM
+	@@map("TypeEmoji")
+}
+
+model Emoji {
+  id String @id @default(uuid())
+  type EmojiType
+
+  ownerId String?
+  shortCode String? @unique
+  value String @unique
+
+  owner User? @relation(fields: [ownerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  reactions Reaction[]
+  @@index([ownerId])
+}
+
+model Reaction {
+  id String @id @default(uuid())
+  userId String 
+  postId String
+  emojiId String
+  
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+  emoji Emoji @relation(fields: [emojiId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt 
+
+  @@unique([postId,userId])
+  @@index([postId])
+  @@index([userId])
+}
+
+enum SkillStatus{
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+model Skill {
+  id String @id @default(uuid())
+
+  slug String @unique
+  thumbnailUrl String
+  title String
+  progress Int
+  description String?
+  content Json
+  status SkillStatus
+
+  searchVector Unsupported("tsvector")
+
+  startedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([slug])
+}
+
+enum ProjectStatus{
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+model Project {
+  id String @id @default(uuid())
+  
+  title String
+  slug String @unique
+  description String
+  content Json
+  thumbnailUrl String
+  githubUrl String
+  demoUrl String
+  status ProjectStatus
+
+  searchVector Unsupported("tsvector")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([slug])
+  @@index([status])
+}
