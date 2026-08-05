@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -27,6 +26,7 @@ enum UserStatus{
 model User {
   id String   @id @default(uuid())
 
+  name String
   role UserRole @default(USER)
   email String   @unique
   username String
@@ -44,6 +44,7 @@ model User {
   comments Comment[]
   reactions Reaction[]
   emojis Emoji[]
+  projects Project[]
 }
 
 enum PostStatus{
@@ -66,6 +67,8 @@ model Post {
   publishedAt DateTime?
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
+
+  searchVector Unsupported("tsvector")?
 
   comments Comment[]
   reactions Reaction[]
@@ -106,6 +109,7 @@ enum EmojiType{
 	@@map("TypeEmoji")
 }
 
+
 model Emoji {
   id String @id @default(uuid())
   type EmojiType
@@ -126,20 +130,21 @@ model Emoji {
 
 model Reaction {
   id String @id @default(uuid())
-  userId String 
+  userId String
   postId String
-  emojiId String
-  
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
-  emoji Emoji @relation(fields: [emojiId], references: [id])
+  emojiId String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  emoji Emoji? @relation(fields: [emojiId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
 
-  @@unique([postId,userId])
+  @@unique([postId, userId])
   @@index([postId])
   @@index([userId])
+  @@index([emojiId])
 }
 
 enum SkillStatus{
@@ -160,7 +165,7 @@ model Skill {
   content Json
   status SkillStatus
 
-  searchVector Unsupported("tsvector")
+  searchVector Unsupported("tsvector")?
 
   startedAt DateTime?
   createdAt DateTime @default(now())
@@ -179,7 +184,10 @@ enum ProjectStatus{
 
 model Project {
   id String @id @default(uuid())
-  
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   title String
   slug String @unique
   description String
@@ -189,7 +197,7 @@ model Project {
   demoUrl String
   status ProjectStatus
 
-  searchVector Unsupported("tsvector")
+  searchVector Unsupported("tsvector")?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -197,4 +205,5 @@ model Project {
 
   @@index([slug])
   @@index([status])
+  @@index([userId])
 }
