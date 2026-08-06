@@ -1,11 +1,8 @@
-import dotenv from "dotenv";
+// server.js
 import app from "./app.js";
+import env from "./config/env.js";
 
-// Đọc biến môi trường từ file .env
-dotenv.config();
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running at http://localhost:${PORT}`);
+// In ra log cổng cụ thể để kiểm tra
+app.listen(env.port, () => {
+    console.log(`🚀 Server is running on http://localhost:${env.port}`);
 });

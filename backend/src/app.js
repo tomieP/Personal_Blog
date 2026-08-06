@@ -1,23 +1,14 @@
 import express from "express";
 
+import authRoutes from "./modules/auth/routes/auth.routes.js";
+
 const app = express();
 
-/**
- * Middleware
- */
-
-// Cho phép Express đọc JSON trong body request
 app.use(express.json());
 
-/**
- * Routes
- */
-
-// Route kiểm tra server có hoạt động hay không
-app.get("/", (req, res) => {
-  res.json({
-    message: "Blog API is running 🚀",
-  });
-});
+app.use("/api/v1/auth", authRoutes);
+// app.get('/', (req, res) => {
+//     res.send("API ok");
+// });
 
 export default app;

@@ -29,7 +29,7 @@ model User {
   name String
   role UserRole @default(USER)
   email String   @unique
-  username String
+  username String @unique
   hashPassword String
 
   avatarUrl String?
