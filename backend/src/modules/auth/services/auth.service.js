@@ -3,12 +3,17 @@ import jwt from 'jsonwebtoken';
 import authRepository from '../repositories/auth.repository.js';
 import env from "../../../config/env.js"
 const register = async (registerData) => {
-    const existingUser = await authRepository.findByEmail(registerData.email);
-    if (existingUser) {
+    const existingEmail = await authRepository.findByEmail(registerData.email);
+    if (existingEmail) {
         throw new Error("Email already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(registerData.password, 10);
+    const existingUsername = await authRepository.findByUsername(registerData.username);
+    if (existingUsername) {
+        throw new Error("Username already exists")
+    }
+
+    const hashedPassword = await bcrypt.hash(registerData.password, env.bcryptSaltRounds);
 
     const newUser = await authRepository.create({
         name: registerData.name,
@@ -22,19 +27,29 @@ const register = async (registerData) => {
 };
 
 const login = async (loginData) => {
-    const user = await authRepository.findByEmail(loginData.email);
-    if (!user) {
+    const createdUser = await authRepository.findByEmail(loginData.email);
+    if (!createdUser) {
         throw new Error("Invalid credentials");
     }
 
-    const isMatch = await bcrypt.compare(loginData.password, user.hashPassword);
+    const isMatch = await bcrypt.compare(loginData.password, createdUser.hashPassword);
     if (!isMatch) {
         throw new Error("Invalid credentials");
     }
 
-    const token = jwt.sign({ id: user.id }, env.jwtSecret, { expiresIn: env.jwtExpiresIn});
+    const token = jwt.sign(
+        { 
+            id: createdUser.id,
+            role: createdUser.role
+        }, 
+        env.jwtSecret, 
+        { 
+            expiresIn: env.jwtExpiresIn
+        });
 
-    return { token };
+    const {hashPassword,...userWithoutPassword} = createdUser
+    return{ token,
+            createdUser: userWithoutPassword};
 };
 
 export default {

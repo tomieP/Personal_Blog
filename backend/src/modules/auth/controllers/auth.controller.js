@@ -15,11 +15,13 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     try {
-        const { token } = await authService.login(req.body);
+        const { token, createdUser } = await authService.login(req.body);
         return res.status(200).json({
             success: true,
             message: "Login successful",
+            createdUser,
             token
+            
         });
     } catch (error) {
         next(error);
