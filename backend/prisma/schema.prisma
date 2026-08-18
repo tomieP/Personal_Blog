@@ -51,6 +51,7 @@ enum PostStatus{
   PENDING
   APPROVED
   REJECTED
+  DRAFT
 }
 model Post {
   id String @id @default(uuid())
@@ -60,7 +61,6 @@ model Post {
   title String
   slug String @unique
   content Json
-  thumbnailUrl String
   status PostStatus @default(PENDING)
 
   createdAt DateTime @default(now())
@@ -158,7 +158,6 @@ model Skill {
   id String @id @default(uuid())
 
   slug String @unique
-  thumbnailUrl String
   title String
   progress Int
   description String?
@@ -192,7 +191,6 @@ model Project {
   slug String @unique
   description String
   content Json
-  thumbnailUrl String
   githubUrl String
   demoUrl String
   status ProjectStatus

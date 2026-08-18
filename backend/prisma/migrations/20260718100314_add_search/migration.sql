@@ -10,7 +10,6 @@ CREATE TYPE "ProjectStatus" AS ENUM ('PLANNING', 'IN_PROGRESS', 'COMPLETED', 'ON
 CREATE TABLE "Skill" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
-    "thumbnailUrl" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "progress" INTEGER NOT NULL,
     "description" TEXT,
@@ -32,7 +31,6 @@ CREATE TABLE "Project" (
     "slug" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "content" JSONB NOT NULL,
-    "thumbnailUrl" TEXT NOT NULL,
     "githubUrl" TEXT NOT NULL,
     "demoUrl" TEXT NOT NULL,
     "status" "ProjectStatus" NOT NULL,

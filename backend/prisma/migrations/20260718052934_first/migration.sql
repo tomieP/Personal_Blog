@@ -36,7 +36,6 @@ CREATE TABLE "Post" (
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "content" JSONB NOT NULL,
-    "thumbnailUrl" TEXT NOT NULL,
     "status" "PostStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "publishedAt" TIMESTAMP(3),

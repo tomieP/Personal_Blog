@@ -1,25 +1,33 @@
-#
-## Backend structure
-
-```
-backend
+backend/
 │
-├── prisma
+├── prisma/
+│   ├── schema.prisma
+│   ├── migrations/
+│   └── seed.js
 │
-├── src
+├── uploads/
+│   ├── avatars/
+│   └── emojis/
+│
+├── src/
 │   ├── config/
-│   ├── controllers/             # Nhận request trả response
-│   ├── services/                # Chứa business logic
-│   ├── repositories/            # Làm việc với Prisma
-│   ├── middlewares/             
-│   ├── routes/                  
-│   ├── utils/                   # Hàm dùng chung
-│   ├── validators/              # Zod schema
-│   ├── uploads/                 # Ảnh, emoji, thumnail
+│   ├── middlewares/
+│   ├── utils/
+│   ├── constants/
+│   ├── docs/
+│   │
+│   ├── modules/
+│   │   ├── auth/
+│   │   ├── user/
+│   │   ├── post/
+│   │   ├── comment/
+│   │   ├── reaction/
+│   │   ├── emoji/
+│   │   ├── project/
+│   │   └── skill/
+│   │
 │   ├── app.js
 │   └── server.js
 │
 ├── .env
-├── package.json
-└── prisma
-```
+└── package.json

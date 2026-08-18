@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import authRepository from '../repositories/auth.repository.js';
 import env from "../../../config/env.js"
+
 const register = async (registerData) => {
     const existingEmail = await authRepository.findByEmail(registerData.email);
     if (existingEmail) {
