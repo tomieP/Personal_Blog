@@ -1,18 +1,20 @@
-import { file, ZodError } from "zod";
+import { ZodError } from "zod";
 
 const validate = (schemas = {}) => {
     return (req, res, next) => {
         try {
+            req.validatedData = {};
+
             if (schemas.body) {
-                req.body = schemas.body.parse(req.body);
+                req.validatedData.body = schemas.body.parse(req.body);
             }
 
             if (schemas.params) {
-                req.params = schemas.params.parse(req.params);
+                req.validatedData.params = schemas.params.parse(req.params);
             }
 
             if (schemas.query) {
-                req.query = schemas.query.parse(req.query);
+                req.validatedData.query = schemas.query.parse(req.query);
             }
 
             next();
