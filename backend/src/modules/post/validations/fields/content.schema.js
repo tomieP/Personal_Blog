@@ -4,7 +4,7 @@ const MAX_2MB = 2 * 1024 * 1024;
 
 export const contentSchema = z
     .object({
-        type: z.literal("doc", "Content must be a \"doc\""),
+        type: z.literal("doc",{message: "Content must be a \"doc\""}),
         content: z.array(z.unknown()).optional(),
     })
     .passthrough()
