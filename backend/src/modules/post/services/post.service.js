@@ -1,5 +1,10 @@
-import {postRepository} from "../repositories/post.repositoty.js"
+import {postRepository} from "../repositories/post.repositoty.js";
+import slugify from "slugify";
+import {nanoid} from "nanoid";
 
+//===================
+//      PUBLIC
+//===================
 const getPublishedPosts = async({
     page = 1,
     limit = 10
@@ -95,11 +100,76 @@ const searchPublishedPosts = async (
     };
 };
 
+//===================
+//      USER
+//===================
+
+const createDraftPost = async ({
+    authorId,
+    title,
+    content,
+    slug,
+}) => {
+
+    let postSlug = slug;
+    if(!postSlug){
+        if(title){
+            postSlug = `${slugify(title,{
+                lower: true,
+                strict:true,
+                locale: true,
+            })}-${nanoid(9)}`;
+        }
+        else{
+            postSlug = `draft-${nanoid(9)}`;
+        }
+    }
+
+    const existingPost = await postRepository.findPost({
+        where:{
+            slug: postSlug
+        },
+        select:{
+            id:true
+        }
+    });
+
+    if(existingPost){
+        throw new Error("Slug already exists");
+    }
+
+    const post = await postRepository.createPost({
+        data:{
+            title,
+            content,
+            slug: postSlug,
+            authorId,
+            status: "DRAFT",
+            publishedAt: null,
+            deleteAt: null,
+        },
+        select:{
+            id: true,
+            slug: true,
+            title: true,
+            content: true,
+            authorId: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true
+        },
+    });
+    return post
+}
+//const getMyPosts
+//const getMyPostById
 export{
     // PUBLIC
     getPublishedPosts,
     getPublishedPostBySlug,
     searchPublishedPosts,
+
+    createDraftPost
 
     
 }
