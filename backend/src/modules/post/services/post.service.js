@@ -1,5 +1,6 @@
 import {postRepository} from "../repositories/post.repositoty.js";
-import {createUniqueSlug} from "../../../utils/custom_slugify.js"
+import {createUniqueSlug} from "../../../utils/custom_slugify.js";
+import { NotFoundError, ConflictError, ForbiddenError } from "../../../utils/errors/AppError.js";
 
 //===================
 //      PUBLIC
@@ -45,7 +46,7 @@ const getPublishedPosts = async({
             totalPages: Math.ceil(total / limit),
         },
     };
-}; 
+};
 
 const getPublishedPostBySlug = async(slug) =>{
     const post = await postRepository.findPost({
@@ -64,8 +65,8 @@ const getPublishedPostBySlug = async(slug) =>{
         },
     });
     if (!post){
-        throw new Error("Post not found")
-    };
+        throw new NotFoundError("Post not found");
+    }
     return post;
 };
 
@@ -119,7 +120,7 @@ const createDraftPost = async ({
     });
 
     if (existingPost) {
-        throw new Error("Slug already exists");
+        throw new ConflictError("Slug already exists");
     }
 
     return postRepository.createPost({
@@ -216,12 +217,12 @@ const getMyPostById = async({
     });
 
     if(!post){
-        throw new Error("Post not found")
-    };
+        throw new NotFoundError("Post not found");
+    }
 
     if(post.authorId != authorId ){
-        throw new Error("post not found")
-    };
+        throw new ForbiddenError("Access denied");
+    }
 
     const {
         authorId: _authorId,
@@ -236,7 +237,7 @@ export{
     getPublishedPosts,
     getPublishedPostBySlug,
     searchPublishedPosts,
-    
+
     //USER
     createDraftPost,
     getMyPosts,
