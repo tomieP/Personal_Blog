@@ -1,6 +1,5 @@
 import {postRepository} from "../repositories/post.repositoty.js";
-import slugify from "slugify";
-import {nanoid} from "nanoid";
+import {createUniqueSlug} from "../../../utils/custom_slugify.js"
 
 //===================
 //      PUBLIC
@@ -110,45 +109,30 @@ const createDraftPost = async ({
     content,
     slug,
 }) => {
-
-    let postSlug = slug;
-    if(!postSlug){
-        if(title){
-            postSlug = `${slugify(title,{
-                lower: true,
-                strict:true,
-                locale: true,
-            })}-${nanoid(9)}`;
-        }
-        else{
-            postSlug = `draft-${nanoid(9)}`;
-        }
-    }
+    // Ưu tiên slug user nhập; nếu không có thì dùng title.
+    const slugSource = slug?.trim() || title;
+    const postSlug = createUniqueSlug(slugSource);
 
     const existingPost = await postRepository.findPost({
-        where:{
-            slug: postSlug
-        },
-        select:{
-            id:true
-        }
+        where: { slug: postSlug },
+        select: { id: true },
     });
 
-    if(existingPost){
+    if (existingPost) {
         throw new Error("Slug already exists");
     }
 
-    const post = await postRepository.createPost({
-        data:{
+    return postRepository.createPost({
+        data: {
             title,
             content,
             slug: postSlug,
             authorId,
             status: "DRAFT",
             publishedAt: null,
-            deleteAt: null,
+            deletedAt: null,
         },
-        select:{
+        select: {
             id: true,
             slug: true,
             title: true,
@@ -156,11 +140,10 @@ const createDraftPost = async ({
             authorId: true,
             status: true,
             createdAt: true,
-            updatedAt: true
+            updatedAt: true,
         },
     });
-    return post
-}
+};
 
 const getMyPosts = async({
     authorId,
@@ -210,7 +193,44 @@ const getMyPosts = async({
     },
 };
 };
-//const getMyPostById
+
+const getMyPostById = async({
+    postid,
+    authorId,
+}) => {
+    const post = await postRepository.findPost({
+        where: {
+            id: postid
+        },
+        select: {
+            id: true,
+            title: true,
+            content: true,
+            slug: true,
+            status: true,
+            rejectReason: true,
+            authorId: true,
+            createdAt: true,
+            updatedAt: true,
+        }
+    });
+
+    if(!post){
+        throw new Error("Post not found")
+    };
+
+    if(post.authorId != authorId ){
+        throw new Error("post not found")
+    };
+
+    const {
+        authorId: _authorId,
+        ...postDetail
+    } = post;
+
+    return postDetail
+}
+
 export{
     // PUBLIC
     getPublishedPosts,
@@ -219,6 +239,6 @@ export{
     
     //USER
     createDraftPost,
-    getMyPosts
-    
+    getMyPosts,
+    getMyPostById,
 }
