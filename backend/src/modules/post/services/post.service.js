@@ -161,15 +161,64 @@ const createDraftPost = async ({
     });
     return post
 }
-//const getMyPosts
+
+const getMyPosts = async({
+    authorId,
+    page = 1,
+    limit = 10,
+    status,
+    sort = "latest",
+}) => {
+    const skip = (page - 1)* limit;
+
+    const where = {
+        authorId,
+        ...(status && {status}),
+    };
+
+    const orderBy = {
+        createdAt: sort == "latest" ? "desc" : "asc"
+    };
+
+     const [posts, total] = await Promise.all([
+        postRepository.findPosts({
+            where,
+            skip,
+            take: limit,
+            orderBy,
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                status: true,
+                createdAt: true,
+            },
+        }),
+
+        postRepository.countPosts({
+            where,
+        }),
+    ]);
+
+    return {
+    data: posts,
+    pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+    },
+};
+};
 //const getMyPostById
 export{
     // PUBLIC
     getPublishedPosts,
     getPublishedPostBySlug,
     searchPublishedPosts,
-
-    createDraftPost
-
+    
+    //USER
+    createDraftPost,
+    getMyPosts
     
 }
